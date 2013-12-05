@@ -27,6 +27,16 @@ type Contact struct {
 }
 
 func Example() {
+	type Account struct {
+		Name string
+	}
+
+	type Contact struct {
+		FirstName string
+		LastName  string
+		Account   *Account
+	}
+
 	var cs []Contact
 	q := force.NewQuery(&cs)
 	q.AddConstraint(NewConstraint("Name").EqualsString("Jake Basile"))
@@ -36,6 +46,33 @@ func Example() {
 	}
 	// Output:
 	// Jake Basile Is From Mutual Mobile
+}
+
+func ExampleForce_RunRawQuery() {
+	type Contact struct {
+		Name string
+	}
+
+	var cs []Contact
+	force.RunRawQuery("SELECT Name FROM Contact WHERE FirstName='Jake' AND LastName='Basile'", &cs)
+	for _, c := range cs {
+		fmt.Println(c.Name)
+	}
+	// Output:
+	// Jake Basile
+}
+
+func ExampleConstraint() {
+	c1 := NewConstraint("FirstName").EqualsString("Jake")
+	c2 := NewConstraint("LastName").NotEqualsString("Basile")
+	c3 := NewConstraint(c1).Or(c2)
+	fmt.Println(c1.Collapse())
+	fmt.Println(c2.Collapse())
+	fmt.Println(c3.Collapse())
+	// Output:
+	// (FirstName='Jake')
+	// (LastName<>'Basile')
+	// ((FirstName='Jake') OR (LastName<>'Basile'))
 }
 
 func TestQueryCreation(t *testing.T) {

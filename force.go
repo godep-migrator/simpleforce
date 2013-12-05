@@ -1,4 +1,10 @@
-// simpleforce is a dead simple wrapper around the Force.com REST API.
+/*
+Package simpleforce is a dead simple wrapper around the Force.com REST API.
+
+It allows you to query for Force.com objects by using idiomatic Go constructs, or you can short
+circuit the query engine and qrite your own SOQL. In either case, data is returned to you via
+structs of your own creation, allowing you full control over what data is returned.
+*/
 package simpleforce
 
 import (
@@ -17,7 +23,8 @@ type Force struct {
 	url     string
 }
 
-// Returns a new Force object with the given login credentials.
+// Returns a new Force object with the given login credentials. This object is the main
+// point of entry for all your Force.com needs.
 func New(session, url string) Force {
 	return Force{
 		session,
@@ -25,6 +32,8 @@ func New(session, url string) Force {
 	}
 }
 
+// Creates a new query for you to customize. When executed, this query will fill the given destination
+// slice with the results of the query.
 func (f Force) NewQuery(dest interface{}) Query {
 	return Query{
 		f,
@@ -42,6 +51,7 @@ func (f Force) authorizeRequest(method, urlStr string, body io.Reader) (*http.Re
 	return r, nil
 }
 
+// Run a raw SOQL query string. This will fill the given destination slice with the results of your query.
 func (f Force) RunRawQuery(query string, dest interface{}) error {
 	vals := url.Values{}
 	vals.Set("q", query)
@@ -62,11 +72,11 @@ func (f Force) RunRawQuery(query string, dest interface{}) error {
 	if err != nil {
 		return err
 	}
-	err = Unmarshal(respJson, dest)
+	err = unmarshal(respJson, dest)
 	return err
 }
 
-func Unmarshal(source *simplejson.Json, dest interface{}) error {
+func unmarshal(source *simplejson.Json, dest interface{}) error {
 	sliceValPtr := reflect.ValueOf(dest)
 	sliceVal := sliceValPtr.Elem()
 	elemType := reflect.TypeOf(dest).Elem().Elem()
@@ -104,18 +114,19 @@ func unmarshalIndividualObject(source *simplejson.Json, valType reflect.Type) (r
 	return val, nil
 }
 
-// Force handles authentication, upserting, saving, and deleting. Query handled by Query object.
-
+// A Force.com query that constructs SOQL for you.
 type Query struct {
 	force       Force
 	dest        interface{}
 	constraints []Constraint
 }
 
+// Adds a Constraint to the query. All constraints added in this way are ANDed together.
 func (q *Query) AddConstraint(c Constraint) {
 	q.constraints = append(q.constraints, c)
 }
 
+// Runs the query, depositing results in the destination given on query creation.
 func (q *Query) Run() error {
 	err := q.force.RunRawQuery(q.Generate(), q.dest)
 	if err != nil {
@@ -124,6 +135,7 @@ func (q *Query) Run() error {
 	return nil
 }
 
+// Constructs the SOQL that this query represents.
 func (q *Query) Generate() string {
 	sel := q.generateSelect()
 	table := reflect.TypeOf(q.dest).Elem().Elem().Name()
@@ -169,6 +181,7 @@ func (q *Query) generateWhere() string {
 	return buf.String()
 }
 
+// Part of a WHERE clause for a SOQL query.
 type Constraint struct {
 	left  interface{}
 	op    string
@@ -183,6 +196,7 @@ func NewConstraint(left interface{}) Constraint {
 	}
 }
 
+// Turns a Constraint into a WHERE clause.
 func (c *Constraint) Collapse() string {
 	var leftString string
 	switch c.left.(type) {
@@ -208,24 +222,28 @@ func (c *Constraint) Collapse() string {
 	}
 }
 
+// Combines two Constraints with AND.
 func (c Constraint) And(right Constraint) Constraint {
 	c.op = " AND "
 	c.right = right
 	return c
 }
 
+// Combines two Constraints with OR.
 func (c Constraint) Or(right Constraint) Constraint {
 	c.op = " OR "
 	c.right = right
 	return c
 }
 
+// Creates an '=' clause to a string value.
 func (c Constraint) EqualsString(right string) Constraint {
 	c.op = "="
 	c.right = "'" + right + "'"
 	return c
 }
 
+// Creates a '<>' clause to a string value.
 func (c Constraint) NotEqualsString(right string) Constraint {
 	c.op = "<>"
 	c.right = "'" + right + "'"
