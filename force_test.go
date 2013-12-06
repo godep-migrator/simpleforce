@@ -26,6 +26,18 @@ type Contact struct {
 	Account   *Account
 }
 
+func BenchmarkQuery(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		var cs []Contact
+		q := force.NewQuery(&cs)
+		q.AddConstraint(NewConstraint("Account.Name").NotEqualsString(""))
+		q.AddConstraint(NewConstraint("FirstName").NotEqualsString(""))
+		q.AddConstraint(NewConstraint("LastName").NotEqualsString(""))
+		q.Limit(1000)
+		q.Run()
+	}
+}
+
 func Example() {
 	type Account struct {
 		Name string
@@ -124,6 +136,9 @@ func TestSimpleQueryRun(t *testing.T) {
 	q.Limit(1000)
 	t.Log(q.Generate())
 	q.Run()
+	if len(cs) != 1000 {
+		t.Fail()
+	}
 	for _, c := range cs {
 		t.Log(c.FirstName, c.LastName, c.Account.Name)
 		if c.FirstName == "" || c.LastName == "" || c.Account == nil || c.Account.Name == "" {
