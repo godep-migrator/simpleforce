@@ -84,6 +84,10 @@ func TestQueryCreation(t *testing.T) {
 func TestSimpleConstraintCreation(t *testing.T) {
 	c := NewConstraint("FirstName").EqualsString("Jake")
 	t.Log(c)
+	t.Log(c.Collapse())
+	if c.Collapse() != "(FirstName='Jake')" {
+		t.Fail()
+	}
 }
 
 func TestComplexConstraintCreation(t *testing.T) {
@@ -94,6 +98,9 @@ func TestComplexConstraintCreation(t *testing.T) {
 	co := NewConstraint(ca).Or(c3)
 	t.Log(co)
 	t.Log(co.Collapse())
+	if co.Collapse() != "(((FirstName='Jake') AND (LastName<>'Basile')) OR (Account.Name='Mutual Mobile'))" {
+		t.Fail()
+	}
 }
 
 func TestSimpleQueryGeneration(t *testing.T) {
@@ -103,23 +110,35 @@ func TestSimpleQueryGeneration(t *testing.T) {
 	q.AddConstraint(NewConstraint("LastName").EqualsString("Basile"))
 	q.AddConstraint(NewConstraint("Account.Name").EqualsString("Mutual Mobile"))
 	t.Log(q.Generate())
+	if q.Generate() != "SELECT FirstName,LastName,Account.Name FROM Contact WHERE (FirstName='Jake') AND (LastName='Basile') AND (Account.Name='Mutual Mobile') LIMIT 10" {
+		t.Fail()
+	}
 }
 
 func TestSimpleQueryRun(t *testing.T) {
 	var cs []Contact
 	q := force.NewQuery(&cs)
-	q.AddConstraint(NewConstraint("FirstName").EqualsString("Jake"))
+	q.AddConstraint(NewConstraint("Account.Name").NotEqualsString(""))
+	q.AddConstraint(NewConstraint("FirstName").NotEqualsString(""))
+	q.AddConstraint(NewConstraint("LastName").NotEqualsString(""))
+	q.Limit(1000)
 	t.Log(q.Generate())
 	q.Run()
 	for _, c := range cs {
 		t.Log(c.FirstName, c.LastName, c.Account.Name)
+		if c.FirstName == "" || c.LastName == "" || c.Account == nil || c.Account.Name == "" {
+			t.Fail()
+		}
 	}
 }
 
 func TestRawQuery(t *testing.T) {
 	var cs []Contact
-	force.RunRawQuery("SELECT FirstName FROM Contact LIMIT 1", &cs)
+	force.RunRawQuery("SELECT FirstName FROM Contact WHERE FirstName<>'' LIMIT 1", &cs)
 	for _, c := range cs {
-		t.Log(c.FirstName, c.LastName, c.Account.Name)
+		t.Log(c)
+		if c.FirstName == "" || c.LastName != "" || c.Account == nil || c.Account.Name != "" {
+			t.Fail()
+		}
 	}
 }

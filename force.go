@@ -39,6 +39,7 @@ func (f Force) NewQuery(dest interface{}) Query {
 		f,
 		dest,
 		make([]Constraint, 0, 0),
+		10,
 	}
 }
 
@@ -119,11 +120,16 @@ type Query struct {
 	force       Force
 	dest        interface{}
 	constraints []Constraint
+	limit       int
 }
 
 // Adds a Constraint to the query. All constraints added in this way are ANDed together.
 func (q *Query) AddConstraint(c Constraint) {
 	q.constraints = append(q.constraints, c)
+}
+
+func (q *Query) Limit(l int) {
+	q.limit = l
 }
 
 // Runs the query, depositing results in the destination given on query creation.
@@ -140,7 +146,13 @@ func (q *Query) Generate() string {
 	sel := q.generateSelect()
 	table := reflect.TypeOf(q.dest).Elem().Elem().Name()
 	where := q.generateWhere()
-	return fmt.Sprintf("SELECT %v FROM %v WHERE %v", sel, table, where)
+	var limit string
+	if q.limit > 0 {
+		limit = fmt.Sprintf(" LIMIT %v", q.limit)
+	} else {
+		limit = ""
+	}
+	return fmt.Sprintf("SELECT %v FROM %v WHERE %v%v", sel, table, where, limit)
 }
 
 func (q *Query) generateSelect() string {
