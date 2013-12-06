@@ -250,20 +250,21 @@ func (c Constraint) Or(right Constraint) Constraint {
 
 // STRING OPERATORS
 
-// Creates an '=' clause to a string value.
+// Creates an '=' clause for a string value.
 func (c Constraint) EqualsString(right string) Constraint {
 	c.op = "="
 	c.right = "'" + right + "'"
 	return c
 }
 
-// Creates a '<>' clause to a string value.
+// Creates a '<>' clause for a string value.
 func (c Constraint) NotEqualsString(right string) Constraint {
 	c.op = "<>"
 	c.right = "'" + right + "'"
 	return c
 }
 
+// Creates an IN clause for a string value.
 func (c Constraint) InString(in ...string) Constraint {
 	c.op = " IN "
 	buf := bytes.NewBufferString("(")
@@ -278,6 +279,7 @@ func (c Constraint) InString(in ...string) Constraint {
 	return c
 }
 
+// Creates a NOT IN clause for a string value.
 func (c Constraint) NotInString(in ...string) Constraint {
 	c.op = " NOT IN "
 	buf := bytes.NewBufferString("(")
@@ -289,5 +291,12 @@ func (c Constraint) NotInString(in ...string) Constraint {
 	}
 	buf.WriteString(")")
 	c.right = buf.String()
+	return c
+}
+
+// Creates a LIKE clause for a string value.
+func (c Constraint) LikeString(like string) Constraint {
+	c.op = " LIKE "
+	c.right = "'" + like + "'"
 	return c
 }

@@ -113,6 +113,15 @@ func TestStringNotInConstraint(t *testing.T) {
 	}
 }
 
+func TestStringLikeConstraint(t *testing.T) {
+	c := simpleforce.NewConstraint("FirstName").LikeString("%K%")
+	t.Log(c)
+	t.Log(c.Collapse())
+	if c.Collapse() != "(FirstName LIKE '%K%')" {
+		t.Fail()
+	}
+}
+
 func TestSimpleQueryGeneration(t *testing.T) {
 	var cs []Contact
 	q := force.NewQuery(&cs)
