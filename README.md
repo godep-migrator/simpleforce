@@ -48,3 +48,10 @@ would output:
     ...
 
 And so on, based on what data is in your Force.com instance.
+
+## Contributing
+
+Please submit an issue on Github before starting work on something, to make sure there's no overlap and that the new feature/bug fix is consistent.
+
+Be sure to add your name and web address to the CONTRIBUTORS.txt file.
+
