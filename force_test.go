@@ -104,6 +104,15 @@ func TestStringInConstraint(t *testing.T) {
 	}
 }
 
+func TestStringNotInConstraint(t *testing.T) {
+	c := simpleforce.NewConstraint("FirstName").NotInString("Jake", "Kyle")
+	t.Log(c)
+	t.Log(c.Collapse())
+	if c.Collapse() != "(FirstName NOT IN ('Jake','Kyle'))" {
+		t.Fail()
+	}
+}
+
 func TestSimpleQueryGeneration(t *testing.T) {
 	var cs []Contact
 	q := force.NewQuery(&cs)

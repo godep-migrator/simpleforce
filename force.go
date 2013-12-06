@@ -277,3 +277,17 @@ func (c Constraint) InString(in ...string) Constraint {
 	c.right = buf.String()
 	return c
 }
+
+func (c Constraint) NotInString(in ...string) Constraint {
+	c.op = " NOT IN "
+	buf := bytes.NewBufferString("(")
+	for i, s := range in {
+		buf.WriteString("'" + s + "'")
+		if i < len(in)-1 {
+			buf.WriteString(",")
+		}
+	}
+	buf.WriteString(")")
+	c.right = buf.String()
+	return c
+}
