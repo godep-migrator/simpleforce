@@ -1,19 +1,20 @@
-package simpleforce
+package simpleforce_test
 
 import (
 	"fmt"
+	"github.com/jakebasile/simpleforce"
 	"os"
 	"testing"
 )
 
 var (
-	force Force
+	force simpleforce.Force
 )
 
 func init() {
 	session := os.Getenv("FORCE_SESSION")
 	url := os.Getenv("FORCE_URL")
-	force = New(session, url)
+	force = simpleforce.New(session, url)
 }
 
 type Account struct {
@@ -23,6 +24,7 @@ type Account struct {
 type Contact struct {
 	FirstName string
 	LastName  string
+	Name      string
 	Account   *Account
 }
 
@@ -30,28 +32,18 @@ func BenchmarkQuery(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		var cs []Contact
 		q := force.NewQuery(&cs)
-		q.AddConstraint(NewConstraint("Account.Name").NotEqualsString(""))
-		q.AddConstraint(NewConstraint("FirstName").NotEqualsString(""))
-		q.AddConstraint(NewConstraint("LastName").NotEqualsString(""))
+		q.AddConstraint(simpleforce.NewConstraint("Account.Name").NotEqualsString(""))
+		q.AddConstraint(simpleforce.NewConstraint("FirstName").NotEqualsString(""))
+		q.AddConstraint(simpleforce.NewConstraint("LastName").NotEqualsString(""))
 		q.Limit(1000)
 		q.Run()
 	}
 }
 
 func Example() {
-	type Account struct {
-		Name string
-	}
-
-	type Contact struct {
-		FirstName string
-		LastName  string
-		Account   *Account
-	}
-
 	var cs []Contact
 	q := force.NewQuery(&cs)
-	q.AddConstraint(NewConstraint("Name").EqualsString("Jake Basile"))
+	q.AddConstraint(simpleforce.NewConstraint("Name").EqualsString("Jake Basile"))
 	q.Run()
 	for _, c := range cs {
 		fmt.Printf("%v %v Is From %v", c.FirstName, c.LastName, c.Account.Name)
@@ -59,10 +51,6 @@ func Example() {
 }
 
 func ExampleForce_RunRawQuery() {
-	type Contact struct {
-		Name string
-	}
-
 	var cs []Contact
 	force.RunRawQuery("SELECT Name FROM Contact WHERE FirstName='Jake' AND LastName='Basile'", &cs)
 	for _, c := range cs {
@@ -71,9 +59,9 @@ func ExampleForce_RunRawQuery() {
 }
 
 func ExampleConstraint() {
-	c1 := NewConstraint("FirstName").EqualsString("Jake")
-	c2 := NewConstraint("LastName").NotEqualsString("Basile")
-	c3 := NewConstraint(c1).Or(c2)
+	c1 := simpleforce.NewConstraint("FirstName").EqualsString("Jake")
+	c2 := simpleforce.NewConstraint("LastName").NotEqualsString("Basile")
+	c3 := simpleforce.NewConstraint(c1).Or(c2)
 	fmt.Println(c1.Collapse())
 	fmt.Println(c2.Collapse())
 	fmt.Println(c3.Collapse())
@@ -86,7 +74,7 @@ func TestQueryCreation(t *testing.T) {
 }
 
 func TestSimpleConstraintCreation(t *testing.T) {
-	c := NewConstraint("FirstName").EqualsString("Jake")
+	c := simpleforce.NewConstraint("FirstName").EqualsString("Jake")
 	t.Log(c)
 	t.Log(c.Collapse())
 	if c.Collapse() != "(FirstName='Jake')" {
@@ -95,11 +83,11 @@ func TestSimpleConstraintCreation(t *testing.T) {
 }
 
 func TestComplexConstraintCreation(t *testing.T) {
-	c1 := NewConstraint("FirstName").EqualsString("Jake")
-	c2 := NewConstraint("LastName").NotEqualsString("Basile")
-	ca := NewConstraint(c1).And(c2)
-	c3 := NewConstraint("Account.Name").EqualsString("Mutual Mobile")
-	co := NewConstraint(ca).Or(c3)
+	c1 := simpleforce.NewConstraint("FirstName").EqualsString("Jake")
+	c2 := simpleforce.NewConstraint("LastName").NotEqualsString("Basile")
+	ca := simpleforce.NewConstraint(c1).And(c2)
+	c3 := simpleforce.NewConstraint("Account.Name").EqualsString("Mutual Mobile")
+	co := simpleforce.NewConstraint(ca).Or(c3)
 	t.Log(co)
 	t.Log(co.Collapse())
 	if co.Collapse() != "(((FirstName='Jake') AND (LastName<>'Basile')) OR (Account.Name='Mutual Mobile'))" {
@@ -110,11 +98,11 @@ func TestComplexConstraintCreation(t *testing.T) {
 func TestSimpleQueryGeneration(t *testing.T) {
 	var cs []Contact
 	q := force.NewQuery(&cs)
-	q.AddConstraint(NewConstraint("FirstName").EqualsString("Jake"))
-	q.AddConstraint(NewConstraint("LastName").EqualsString("Basile"))
-	q.AddConstraint(NewConstraint("Account.Name").EqualsString("Mutual Mobile"))
+	q.AddConstraint(simpleforce.NewConstraint("FirstName").EqualsString("Jake"))
+	q.AddConstraint(simpleforce.NewConstraint("LastName").EqualsString("Basile"))
+	q.AddConstraint(simpleforce.NewConstraint("Account.Name").EqualsString("Mutual Mobile"))
 	t.Log(q.Generate())
-	if q.Generate() != "SELECT FirstName,LastName,Account.Name FROM Contact WHERE (FirstName='Jake') AND (LastName='Basile') AND (Account.Name='Mutual Mobile') LIMIT 10" {
+	if q.Generate() != "SELECT FirstName,LastName,Name,Account.Name FROM Contact WHERE (FirstName='Jake') AND (LastName='Basile') AND (Account.Name='Mutual Mobile') LIMIT 10" {
 		t.Fail()
 	}
 }
@@ -122,9 +110,9 @@ func TestSimpleQueryGeneration(t *testing.T) {
 func TestSimpleQueryRun(t *testing.T) {
 	var cs []Contact
 	q := force.NewQuery(&cs)
-	q.AddConstraint(NewConstraint("Account.Name").NotEqualsString(""))
-	q.AddConstraint(NewConstraint("FirstName").NotEqualsString(""))
-	q.AddConstraint(NewConstraint("LastName").NotEqualsString(""))
+	q.AddConstraint(simpleforce.NewConstraint("Account.Name").NotEqualsString(""))
+	q.AddConstraint(simpleforce.NewConstraint("FirstName").NotEqualsString(""))
+	q.AddConstraint(simpleforce.NewConstraint("LastName").NotEqualsString(""))
 	q.Limit(1000)
 	t.Log(q.Generate())
 	q.Run()
