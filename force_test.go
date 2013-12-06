@@ -56,8 +56,6 @@ func Example() {
 	for _, c := range cs {
 		fmt.Printf("%v %v Is From %v", c.FirstName, c.LastName, c.Account.Name)
 	}
-	// Output:
-	// Jake Basile Is From Mutual Mobile
 }
 
 func ExampleForce_RunRawQuery() {
@@ -70,8 +68,6 @@ func ExampleForce_RunRawQuery() {
 	for _, c := range cs {
 		fmt.Println(c.Name)
 	}
-	// Output:
-	// Jake Basile
 }
 
 func ExampleConstraint() {
@@ -81,10 +77,6 @@ func ExampleConstraint() {
 	fmt.Println(c1.Collapse())
 	fmt.Println(c2.Collapse())
 	fmt.Println(c3.Collapse())
-	// Output:
-	// (FirstName='Jake')
-	// (LastName<>'Basile')
-	// ((FirstName='Jake') OR (LastName<>'Basile'))
 }
 
 func TestQueryCreation(t *testing.T) {
