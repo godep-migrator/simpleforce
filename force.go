@@ -264,6 +264,34 @@ func (c Constraint) NotEqualsString(right string) Constraint {
 	return c
 }
 
+// Creates a '>' clause for a string value.
+func (c Constraint) NotEqualsString(right string) Constraint {
+	c.op = ">"
+	c.right = "'" + right + "'"
+	return c
+}
+
+// Creates a '>=' clause for a string value.
+func (c Constraint) NotEqualsString(right string) Constraint {
+	c.op = ">="
+	c.right = "'" + right + "'"
+	return c
+}
+
+// Creates a '<' clause for a string value.
+func (c Constraint) NotEqualsString(right string) Constraint {
+	c.op = "<"
+	c.right = "'" + right + "'"
+	return c
+}
+
+// Creates a '<=' clause for a string value.
+func (c Constraint) NotEqualsString(right string) Constraint {
+	c.op = "<="
+	c.right = "'" + right + "'"
+	return c
+}
+
 // Creates an IN clause for a string value.
 func (c Constraint) InString(in ...string) Constraint {
 	c.op = " IN "
