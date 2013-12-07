@@ -154,6 +154,22 @@ func TestSimpleQueryRun(t *testing.T) {
 	}
 }
 
+func TestUnmarshalFloat(t *testing.T) {
+	type MMAssignment__c struct {
+		Actual_Hours__c float32
+		Estimated_Direct_Labor_Cost__c float32
+	}
+
+	var as []MMAssignment__c
+	q := force.NewQuery(&as)
+	q.AddConstraint(simpleforce.NewConstraint("Status__c").EqualsString("Approved"))
+	q.Limit(1)
+	t.Log(q.Generate())
+	q.Run()
+	t.Log(as)
+	t.Fail()
+}
+
 func TestRawQuery(t *testing.T) {
 	var cs []Contact
 	force.RunRawQuery("SELECT FirstName FROM Contact WHERE FirstName<>'' LIMIT 1", &cs)

@@ -15,6 +15,7 @@ import (
 	"net/http"
 	"net/url"
 	"reflect"
+	"log"
 )
 
 type Force struct {
@@ -94,10 +95,25 @@ func unmarshal(source *simplejson.Json, dest interface{}) error {
 func unmarshalIndividualObject(source *simplejson.Json, valType reflect.Type) (reflect.Value, error) {
 	valPtr := reflect.New(valType)
 	val := reflect.Indirect(valPtr)
+	js, _ := source.MarshalJSON()
+	log.Println(string(js))
 	for f := 0; f < valType.NumField(); f++ {
 		// find the field
 		field := val.Field(f)
+		// logging
+		log.Println(valType.Field(f).Name, field.Kind(), source.Get(valType.Field(f).Name))
 		switch field.Kind() {
+		case reflect.Bool:
+			boolVal := source.Get(valType.Field(f).Name).MustBool()
+			field.SetBool(boolVal)
+		case reflect.Int:
+		case reflect.Int64:
+			intVal := source.Get(valType.Field(f).Name).MustInt64()
+			field.SetInt(intVal)
+		case reflect.Float32:
+		case reflect.Float64:
+			floatVal := source.Get(valType.Field(f).Name).MustFloat64()
+			field.SetFloat(floatVal)
 		case reflect.String:
 			strVal := source.Get(valType.Field(f).Name).MustString()
 			field.SetString(strVal)
