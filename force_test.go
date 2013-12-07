@@ -122,6 +122,24 @@ func TestStringLikeConstraint(t *testing.T) {
 	}
 }
 
+func TestIntInConstraint(t *testing.T) {
+	c := simpleforce.NewConstraint("Dummy__c").InInt(1, 2, 3, 4, 5)
+	t.Log(c)
+	t.Log(c.Collapse())
+	if c.Collapse() != "(Dummy__c IN (1,2,3,4,5))" {
+		t.Fail()
+	}
+}
+
+func TestIntNotInConstraint(t *testing.T) {
+	c := simpleforce.NewConstraint("Dummy__c").NotInInt(1, 2, 3, 4, 5)
+	t.Log(c)
+	t.Log(c.Collapse())
+	if c.Collapse() != "(Dummy__c NOT IN (1,2,3,4,5))" {
+		t.Fail()
+	}
+}
+
 func TestSimpleQueryGeneration(t *testing.T) {
 	var cs []Contact
 	q := force.NewQuery(&cs)
