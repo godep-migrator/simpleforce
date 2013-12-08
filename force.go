@@ -32,6 +32,30 @@ func New(session, url string) Force {
 	}
 }
 
+func NewWithCredentials(loginUrl, consumerKey, consumerSecret, username, password string) (Force, error) {
+	resp, err := http.PostForm(loginUrl+"/services/oauth2/token", url.Values{
+		"grant_type":    {"password"},
+		"client_id":     {consumerKey},
+		"client_secret": {consumerSecret},
+		"username":      {username},
+		"password":      {password},
+	})
+	if err != nil {
+		return Force{}, err
+	}
+	respBytes, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return Force{}, err
+	}
+	respJson, err := simplejson.NewJson(respBytes)
+	if err != nil {
+		return Force{}, err
+	}
+	session := respJson.Get("access_token").MustString()
+	url := respJson.Get("instance_url").MustString() + "/services/data/v27.0"
+	return New(session, url), err
+}
+
 // Creates a new query for you to customize. When executed, this query will fill the given destination
 // slice with the results of the query.
 func (f Force) NewQuery(dest interface{}) Query {

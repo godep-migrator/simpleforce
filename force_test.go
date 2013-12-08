@@ -13,9 +13,22 @@ var (
 )
 
 func init() {
-	session := os.Getenv("FORCE_SESSION")
-	url := os.Getenv("FORCE_URL")
-	force = simpleforce.New(session, url)
+	if len(os.Getenv("SF_PASSWORD")) > 0 {
+		un := os.Getenv("SF_USERNAME")
+		pw := os.Getenv("SF_PASSWORD")
+		secret := os.Getenv("SF_CLIENT_SECRET")
+		id := os.Getenv("SF_CLIENT_ID")
+		login := os.Getenv("SF_LOGIN_URL")
+		nforce, err := simpleforce.NewWithCredentials(login, id, secret, un, pw)
+		if err != nil {
+			panic(err)
+		}
+		force = nforce
+	} else {
+		session := os.Getenv("FORCE_SESSION")
+		url := os.Getenv("FORCE_URL")
+		force = simpleforce.New(session, url)
+	}
 }
 
 type Account struct {
