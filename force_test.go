@@ -5,6 +5,7 @@ import (
 	"github.com/jakebasile/simpleforce"
 	"os"
 	"testing"
+	"time"
 )
 
 var (
@@ -149,6 +150,21 @@ func TestSimpleQueryGeneration(t *testing.T) {
 	t.Log(q.Generate())
 	if q.Generate() != "SELECT FirstName,LastName,Name,Account.Name FROM Contact WHERE (FirstName='Jake') AND (LastName='Basile') AND (Account.Name='Mutual Mobile') LIMIT 10" {
 		t.Fail()
+	}
+}
+
+func TestDate(t *testing.T) {
+	type Contact struct {
+		Birthdate time.Time
+	}
+
+	var cs []Contact
+	force.RunRawQuery("SELECT Birthdate FROM Contact WHERE Birthdate <> NULL LIMIT 1", &cs)
+	t.Log(cs)
+	for _, c := range cs {
+		if c.Birthdate.IsZero() {
+			t.Fail()
+		}
 	}
 }
 

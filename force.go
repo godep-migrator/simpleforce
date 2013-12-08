@@ -15,6 +15,7 @@ import (
 	"net/http"
 	"net/url"
 	"reflect"
+	"time"
 )
 
 type Force struct {
@@ -115,6 +116,19 @@ func unmarshalIndividualObject(source *simplejson.Json, valType reflect.Type) (r
 		case reflect.String:
 			strVal := source.Get(valType.Field(f).Name).MustString()
 			field.SetString(strVal)
+		case reflect.Struct:
+			strVal := source.Get(valType.Field(f).Name).MustString()
+			if valType.Field(f).Type.Name() == "Time" {
+				if t, err := time.Parse(time.RFC3339Nano, strVal); err == nil {
+					// it's a datetime string, probably!
+					field.Set(reflect.ValueOf(t))
+				} else if t, err = time.Parse("2006-01-02", strVal); err == nil {
+					// nope, it's a date string!
+					field.Set(reflect.ValueOf(t))
+				} else {
+					return val, err
+				}
+			}
 		case reflect.Ptr:
 			objJson := source.Get(valType.Field(f).Name)
 			objType := valType.Field(f).Type.Elem()
