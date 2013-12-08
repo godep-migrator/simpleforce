@@ -119,10 +119,10 @@ func unmarshalIndividualObject(source *simplejson.Json, valType reflect.Type) (r
 		case reflect.Struct:
 			strVal := source.Get(valType.Field(f).Name).MustString()
 			if valType.Field(f).Type.Name() == "Time" {
-				if t, err := time.Parse(time.RFC3339Nano, strVal); err == nil {
+				if t, err := time.Parse(DateTimeFormat, strVal); err == nil {
 					// it's a datetime string, probably!
 					field.Set(reflect.ValueOf(t))
-				} else if t, err = time.Parse("2006-01-02", strVal); err == nil {
+				} else if t, err = time.Parse(DateFormat, strVal); err == nil {
 					// nope, it's a date string!
 					field.Set(reflect.ValueOf(t))
 				} else {

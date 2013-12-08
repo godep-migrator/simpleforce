@@ -198,3 +198,21 @@ func TestRawQuery(t *testing.T) {
 		}
 	}
 }
+
+func TestDateTime(t *testing.T) {
+	type Contact struct {
+		Birthdate time.Time
+	}
+
+	var cs []Contact
+	q := force.NewQuery(&cs)
+	q.AddConstraint(simpleforce.NewConstraint("Birthdate").LessEqualsTime(false, time.Now()))
+	q.Limit(100)
+	t.Log(q.Generate())
+	q.Run()
+	for _, c := range cs {
+		if c.Birthdate.After(time.Now()) {
+			t.Fail()
+		}
+	}
+}
