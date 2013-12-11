@@ -54,3 +54,15 @@ func (c Constraint) Or(right Constraint) Constraint {
 	c.right = right
 	return c
 }
+
+func (c Constraint) EqualsNull() Constraint {
+	c.op = "="
+	c.right = "NULL"
+	return c
+}
+
+func (c Constraint) NotEqualsNull() Constraint {
+	c.op = "<>"
+	c.right = "NULL"
+	return c
+}
