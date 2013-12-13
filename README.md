@@ -31,12 +31,16 @@ type Contact struct {
 func main() {
     f := simpleforce.New("your_session_id", "your_force_url")
     var cs []Account
-    q := f.NewQuery(a)
-    c1 := simpleforce.NewConstraint("FirstName").EqualsString("Jake")
-    c2 := simpleforce.NewConstraint("Account.Name").EqualsString("Mutual Mobile")
-    q.AddConstraint(simpleforce.NewConstraint(c1).Or(c2))
-    q.Run()
-    for _, c := range as {
+    f.Query(`
+        SELECT
+            FirstName,
+            LastName,
+            Account.Name
+        FROM Contact
+        WHERE
+            FirstName='Jake' OR
+            Account.Name='Mutual Mobile'`, &cs)
+    for _, c := range cs {
         fmt.Printf("%v Works At %v", c.FirstName, c.Account.Name)
     }
 }
