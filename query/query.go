@@ -3,8 +3,8 @@ package query
 import (
 	"bytes"
 	"fmt"
-	"reflect"
 	"github.com/jakebasile/simpleforce"
+	"reflect"
 )
 
 // A Force.com query that constructs SOQL for you.

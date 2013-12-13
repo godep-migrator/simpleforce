@@ -45,124 +45,26 @@ type Contact struct {
 func BenchmarkQuery(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		var cs []Contact
-		q := force.NewQuery(&cs)
-		q.AddConstraint(simpleforce.NewConstraint("Account.Name").NotEqualsString(""))
-		q.AddConstraint(simpleforce.NewConstraint("FirstName").NotEqualsString(""))
-		q.AddConstraint(simpleforce.NewConstraint("LastName").NotEqualsString(""))
-		q.Limit(1000)
-		q.Run()
+		force.Query(`
+			SELECT 
+				Account.Name,
+				FirstName,
+				LastName,
+				Name
+			FROM Contact
+			WHERE 
+				Account.Name <> '' AND
+				FirstName <> '' AND
+				LastName <> ''
+			LIMIT 1000`, &cs)
 	}
 }
 
-func Example() {
+func ExampleForce_Query() {
 	var cs []Contact
-	q := force.NewQuery(&cs)
-	q.AddConstraint(simpleforce.NewConstraint("Name").EqualsString("Jake Basile"))
-	q.Run()
-	for _, c := range cs {
-		fmt.Printf("%v %v Is From %v", c.FirstName, c.LastName, c.Account.Name)
-	}
-}
-
-func ExampleForce_RunRawQuery() {
-	var cs []Contact
-	force.RunRawQuery("SELECT Name FROM Contact WHERE FirstName='Jake' AND LastName='Basile'", &cs)
+	force.Query("SELECT Name FROM Contact WHERE FirstName='Jake' AND LastName='Basile'", &cs)
 	for _, c := range cs {
 		fmt.Println(c.Name)
-	}
-}
-
-func ExampleConstraint() {
-	c1 := simpleforce.NewConstraint("FirstName").EqualsString("Jake")
-	c2 := simpleforce.NewConstraint("LastName").NotEqualsString("Basile")
-	c3 := simpleforce.NewConstraint(c1).Or(c2)
-	fmt.Println(c1.Collapse())
-	fmt.Println(c2.Collapse())
-	fmt.Println(c3.Collapse())
-}
-
-func TestQueryCreation(t *testing.T) {
-	var as []Account
-	q := force.NewQuery(&as)
-	t.Log(q)
-}
-
-func TestSimpleConstraintCreation(t *testing.T) {
-	c := simpleforce.NewConstraint("FirstName").EqualsString("Jake")
-	t.Log(c)
-	t.Log(c.Collapse())
-	if c.Collapse() != "(FirstName='Jake')" {
-		t.Fail()
-	}
-}
-
-func TestComplexConstraintCreation(t *testing.T) {
-	c1 := simpleforce.NewConstraint("FirstName").EqualsString("Jake")
-	c2 := simpleforce.NewConstraint("LastName").NotEqualsString("Basile")
-	ca := simpleforce.NewConstraint(c1).And(c2)
-	c3 := simpleforce.NewConstraint("Account.Name").EqualsString("Mutual Mobile")
-	co := simpleforce.NewConstraint(ca).Or(c3)
-	t.Log(co)
-	t.Log(co.Collapse())
-	if co.Collapse() != "(((FirstName='Jake') AND (LastName<>'Basile')) OR (Account.Name='Mutual Mobile'))" {
-		t.Fail()
-	}
-}
-
-func TestStringInConstraint(t *testing.T) {
-	c := simpleforce.NewConstraint("FirstName").InString("Jake", "Kyle")
-	t.Log(c)
-	t.Log(c.Collapse())
-	if c.Collapse() != "(FirstName IN ('Jake','Kyle'))" {
-		t.Fail()
-	}
-}
-
-func TestStringNotInConstraint(t *testing.T) {
-	c := simpleforce.NewConstraint("FirstName").NotInString("Jake", "Kyle")
-	t.Log(c)
-	t.Log(c.Collapse())
-	if c.Collapse() != "(FirstName NOT IN ('Jake','Kyle'))" {
-		t.Fail()
-	}
-}
-
-func TestStringLikeConstraint(t *testing.T) {
-	c := simpleforce.NewConstraint("FirstName").LikeString("%K%")
-	t.Log(c)
-	t.Log(c.Collapse())
-	if c.Collapse() != "(FirstName LIKE '%K%')" {
-		t.Fail()
-	}
-}
-
-func TestIntInConstraint(t *testing.T) {
-	c := simpleforce.NewConstraint("Dummy__c").InInt(1, 2, 3, 4, 5)
-	t.Log(c)
-	t.Log(c.Collapse())
-	if c.Collapse() != "(Dummy__c IN (1,2,3,4,5))" {
-		t.Fail()
-	}
-}
-
-func TestIntNotInConstraint(t *testing.T) {
-	c := simpleforce.NewConstraint("Dummy__c").NotInInt(1, 2, 3, 4, 5)
-	t.Log(c)
-	t.Log(c.Collapse())
-	if c.Collapse() != "(Dummy__c NOT IN (1,2,3,4,5))" {
-		t.Fail()
-	}
-}
-
-func TestSimpleQueryGeneration(t *testing.T) {
-	var cs []Contact
-	q := force.NewQuery(&cs)
-	q.AddConstraint(simpleforce.NewConstraint("FirstName").EqualsString("Jake"))
-	q.AddConstraint(simpleforce.NewConstraint("LastName").EqualsString("Basile"))
-	q.AddConstraint(simpleforce.NewConstraint("Account.Name").EqualsString("Mutual Mobile"))
-	t.Log(q.Generate())
-	if q.Generate() != "SELECT FirstName,LastName,Name,Account.Name FROM Contact WHERE (FirstName='Jake') AND (LastName='Basile') AND (Account.Name='Mutual Mobile') LIMIT 10" {
-		t.Fail()
 	}
 }
 
@@ -172,7 +74,7 @@ func TestDate(t *testing.T) {
 	}
 
 	var cs []Contact
-	force.RunRawQuery("SELECT Birthdate FROM Contact WHERE Birthdate <> NULL LIMIT 1", &cs)
+	force.Query("SELECT Birthdate FROM Contact WHERE Birthdate <> NULL LIMIT 1", &cs)
 	t.Log(cs)
 	for _, c := range cs {
 		if c.Birthdate.IsZero() {
@@ -180,51 +82,12 @@ func TestDate(t *testing.T) {
 		}
 	}
 }
-
-func TestSimpleQueryRun(t *testing.T) {
-	var cs []Contact
-	q := force.NewQuery(&cs)
-	q.AddConstraint(simpleforce.NewConstraint("Account.Name").NotEqualsString(""))
-	q.AddConstraint(simpleforce.NewConstraint("FirstName").NotEqualsString(""))
-	q.AddConstraint(simpleforce.NewConstraint("LastName").NotEqualsString(""))
-	q.Limit(1000)
-	t.Log(q.Generate())
-	q.Run()
-	if len(cs) != 1000 {
-		t.Fail()
-	}
-	for _, c := range cs {
-		t.Log(c.FirstName, c.LastName, c.Account.Name)
-		if c.FirstName == "" || c.LastName == "" || c.Account == nil || c.Account.Name == "" {
-			t.Fail()
-		}
-	}
-}
-
 func TestRawQuery(t *testing.T) {
 	var cs []Contact
-	force.RunRawQuery("SELECT FirstName FROM Contact WHERE FirstName<>'' LIMIT 1", &cs)
+	force.Query("SELECT FirstName FROM Contact WHERE FirstName<>'' LIMIT 1", &cs)
 	for _, c := range cs {
 		t.Log(c)
 		if c.FirstName == "" || c.LastName != "" || c.Account == nil || c.Account.Name != "" {
-			t.Fail()
-		}
-	}
-}
-
-func TestDateTime(t *testing.T) {
-	type Contact struct {
-		Birthdate time.Time
-	}
-
-	var cs []Contact
-	q := force.NewQuery(&cs)
-	q.AddConstraint(simpleforce.NewConstraint("Birthdate").LessEqualsTime(false, time.Now()))
-	q.Limit(100)
-	t.Log(q.Generate())
-	q.Run()
-	for _, c := range cs {
-		if c.Birthdate.After(time.Now()) {
 			t.Fail()
 		}
 	}
@@ -240,7 +103,7 @@ func TestChildObjects(t *testing.T) {
 	}
 
 	var as []Account
-	force.RunRawQuery("SELECT Name, (SELECT Name FROM Contacts) FROM Account WHERE Name='Mutual Mobile' LIMIT 1", &as)
+	force.Query("SELECT Name, (SELECT Name FROM Contacts) FROM Account WHERE Name='Mutual Mobile' LIMIT 1", &as)
 	t.Log(as)
 	for _, a := range as {
 		if len(a.Contacts) == 0 {
