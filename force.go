@@ -155,12 +155,31 @@ func unmarshalIndividualObject(source *simplejson.Json, valType reflect.Type) (r
 			}
 		case reflect.Ptr:
 			objJson := source.Get(valType.Field(f).Name)
-			objType := valType.Field(f).Type.Elem()
-			objVal, err := unmarshalIndividualObject(objJson, objType)
-			if err != nil {
-				return val, err
+			if objJson != nil {
+				objType := valType.Field(f).Type.Elem()
+				objVal, err := unmarshalIndividualObject(objJson, objType)
+				if err != nil {
+					return val, err
+				}
+				field.Set(objVal.Addr())
 			}
-			field.Set(objVal.Addr())
+		case reflect.Slice:
+			objJson := source.Get(valType.Field(f).Name).Get("records")
+			length := source.Get(valType.Field(f).Name).Get("totalSize").MustInt()
+			if objJson != nil {
+				elemType := field.Type().Elem()
+				objSlicePtr := reflect.New(field.Type())
+				objSlice := reflect.Indirect(objSlicePtr)
+				for i := 0; i < length; i++ {
+					o := objJson.GetIndex(i)
+					obj, err := unmarshalIndividualObject(o, elemType)
+					if err != nil {
+						return val, err
+					}
+					objSlice.Set(reflect.Append(objSlice, obj))
+				}
+				field.Set(objSlice)
+			}
 		}
 	}
 	return val, nil

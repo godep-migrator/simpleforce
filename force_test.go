@@ -229,3 +229,27 @@ func TestDateTime(t *testing.T) {
 		}
 	}
 }
+
+func TestChildObjects(t *testing.T) {
+	type Contact struct {
+		Name string
+	}
+	type Account struct {
+		Name     string
+		Contacts []Contact
+	}
+
+	var as []Account
+	force.RunRawQuery("SELECT Name, (SELECT Name FROM Contacts) FROM Account WHERE Name='Mutual Mobile' LIMIT 1", &as)
+	t.Log(as)
+	for _, a := range as {
+		if len(a.Contacts) == 0 {
+			t.Fail()
+		}
+		for _, c := range a.Contacts {
+			if c.Name == "" {
+				t.Fail()
+			}
+		}
+	}
+}
