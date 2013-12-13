@@ -1,4 +1,4 @@
-package simpleforce
+package query
 
 // Creates an '=' clause for a bool value.
 func (c Constraint) EqualsBool(right bool) Constraint {

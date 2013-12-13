@@ -1,17 +1,29 @@
-package simpleforce
+package query
 
 import (
 	"bytes"
 	"fmt"
 	"reflect"
+	"github.com/jakebasile/simpleforce"
 )
 
 // A Force.com query that constructs SOQL for you.
 type Query struct {
-	force       Force
+	force       simpleforce.Force
 	dest        interface{}
 	constraints []Constraint
 	limit       int
+}
+
+// Creates a new query for you to customize. When executed, this query will fill the given destination
+// slice with the results of the query.
+func New(f simpleforce.Force, dest interface{}) Query {
+	return Query{
+		f,
+		dest,
+		make([]Constraint, 0, 0),
+		10,
+	}
 }
 
 // Adds a Constraint to the query. All constraints added in this way are ANDed together.
@@ -25,7 +37,7 @@ func (q *Query) Limit(l int) {
 
 // Runs the query, depositing results in the destination given on query creation.
 func (q *Query) Run() error {
-	err := q.force.RunRawQuery(q.Generate(), q.dest)
+	err := q.force.Query(q.Generate(), q.dest)
 	if err != nil {
 		return err
 	}

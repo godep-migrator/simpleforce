@@ -18,6 +18,11 @@ import (
 	"time"
 )
 
+const (
+	DateFormat     = "2006-01-02"
+	DateTimeFormat = time.RFC3339Nano
+)
+
 type Force struct {
 	session string
 	url     string
@@ -56,17 +61,6 @@ func NewWithCredentials(loginUrl, consumerKey, consumerSecret, username, passwor
 	return New(session, url), err
 }
 
-// Creates a new query for you to customize. When executed, this query will fill the given destination
-// slice with the results of the query.
-func (f Force) NewQuery(dest interface{}) Query {
-	return Query{
-		f,
-		dest,
-		make([]Constraint, 0, 0),
-		10,
-	}
-}
-
 func (f Force) authorizeRequest(method, urlStr string, body io.Reader) (*http.Request, error) {
 	r, err := http.NewRequest(method, urlStr, body)
 	if err != nil {
@@ -77,7 +71,7 @@ func (f Force) authorizeRequest(method, urlStr string, body io.Reader) (*http.Re
 }
 
 // Run a raw SOQL query string. This will fill the given destination slice with the results of your query.
-func (f Force) RunRawQuery(query string, dest interface{}) error {
+func (f Force) Query(query string, dest interface{}) error {
 	vals := url.Values{}
 	vals.Set("q", query)
 	url := f.url + "/query?" + vals.Encode()

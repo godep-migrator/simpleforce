@@ -1,4 +1,4 @@
-package simpleforce
+package query
 
 import (
 	"bytes"

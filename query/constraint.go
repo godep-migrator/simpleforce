@@ -1,4 +1,4 @@
-package simpleforce
+package query
 
 // Part of a WHERE clause for a SOQL query.
 type Constraint struct {
