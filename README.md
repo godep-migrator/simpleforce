@@ -5,7 +5,7 @@ Force.com REST API made simple for Go.
 ## Installation
 
 ```bash
-go get github.com/jakebasile/simpleforce
+go get bitbucket.org/jakebasile/simpleforce
 ```
 
 ## Usage
@@ -15,7 +15,7 @@ For basic usage examples, please check the included tests. But, simply:
 ```go
 import (
     "fmt"
-    "github.com/jakebasile/simpleforce"
+    "bitbucket.org/jakebasile/simpleforce"
 )
 
 type Account struct {

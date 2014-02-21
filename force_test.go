@@ -2,7 +2,7 @@ package simpleforce_test
 
 import (
 	"fmt"
-	"github.com/jakebasile/simpleforce"
+	"bitbucket.org/jakebasile/simpleforce"
 	"os"
 	"testing"
 	"time"
