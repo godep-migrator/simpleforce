@@ -1,0 +1,11 @@
+{
+	"ImportPath": "bitbucket.org/jakebasile/simpleforce",
+	"GoVersion": "go1.2",
+	"Deps": [
+		{
+			"ImportPath": "github.com/bitly/go-simplejson",
+			"Comment": "v0.4.3-12-g408ce0b",
+			"Rev": "408ce0b284fa7ad36e3856fcde50022e885474b2"
+		}
+	]
+}
