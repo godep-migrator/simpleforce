@@ -3,7 +3,7 @@ package query
 import (
 	"bytes"
 	"fmt"
-	"github.com/jakebasile/simpleforce"
+	"bitbucket.org/jakebasile/simpleforce"
 	"reflect"
 )
 
