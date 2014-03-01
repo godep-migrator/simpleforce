@@ -14,6 +14,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"os"
 	"reflect"
 	"time"
 )
@@ -59,6 +60,10 @@ func NewWithCredentials(loginUrl, consumerKey, consumerSecret, username, passwor
 	session := respJson.Get("access_token").MustString()
 	url := respJson.Get("instance_url").MustString() + "/services/data/v27.0"
 	return New(session, url), err
+}
+
+func NewFromEnvironment() (Force, error) {
+	return NewWithCredentials(os.Getenv("SF_LOGIN_URL"), os.Getenv("SF_CLIENT_ID"), os.Getenv("SF_CLIENT_SECRET"), os.Getenv("SF_USERNAME"), os.Getenv("SF_PASSWORD")+os.Getenv("SF_TOKEN"))
 }
 
 func (f Force) authorizeRequest(method, urlStr string, body io.Reader) (*http.Request, error) {
