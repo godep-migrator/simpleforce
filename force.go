@@ -100,6 +100,10 @@ func (f Force) Query(query string, dest interface{}) error {
 	return err
 }
 
+func (f Force) Create(interface{}) (interface{}, error) {
+
+}
+
 func unmarshal(source *simplejson.Json, dest interface{}) error {
 	sliceValPtr := reflect.ValueOf(dest)
 	sliceVal := sliceValPtr.Elem()

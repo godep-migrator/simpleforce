@@ -1,5 +1,5 @@
 {
-	"ImportPath": "bitbucket.org/jakebasile/simpleforce",
+	"ImportPath": "github.com/jakebasile/simpleforce",
 	"GoVersion": "go1.2",
 	"Deps": [
 		{

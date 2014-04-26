@@ -1,7 +1,7 @@
 package simpleforce_test
 
 import (
-	"bitbucket.org/jakebasile/simpleforce"
+	"github.com/jakebasile/simpleforce"
 	"fmt"
 	"testing"
 	"time"

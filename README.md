@@ -5,7 +5,7 @@ Force.com REST API made simple for Go.
 ## Installation
 
 ```bash
-go get bitbucket.org/jakebasile/simpleforce
+go get github.com/jakebasile/simpleforce
 ```
 
 ## Usage
@@ -16,7 +16,7 @@ For basic usage examples, please check the included tests. But, simply:
 package main
 
 import (
-    "bitbucket.org/jakebasile/simpleforce"
+    "github.com/jakebasile/simpleforce"
     "fmt"
 )
 
@@ -59,7 +59,7 @@ And so on, based on what data is in your Force.com instance.
 
 ## Querygen
 
-The `bitbucket.org/jakebasile/simpleforce/query` package lets you use Go constructs to query Salesforce. It is currently *unfnished but usable*. Beware circular references, as I haven't gotten those working yet.
+The `github.com/jakebasile/simpleforce/query` package lets you use Go constructs to query Salesforce. It is currently *unfnished but usable*. Beware circular references, as I haven't gotten those working yet.
 
 Here's an example, equivalent to the previous example but using the `query` package.
 
@@ -67,8 +67,8 @@ Here's an example, equivalent to the previous example but using the `query` pack
 package main
 
 import (
-	"bitbucket.org/jakebasile/simpleforce"
-	"bitbucket.org/jakebasile/simpleforce/query"
+	"github.com/jakebasile/simpleforce"
+	"github.com/jakebasile/simpleforce/query"
 	"fmt"
 )
 

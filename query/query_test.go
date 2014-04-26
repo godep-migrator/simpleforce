@@ -2,8 +2,8 @@ package query_test
 
 import (
 	"fmt"
-	"bitbucket.org/jakebasile/simpleforce"
-	"bitbucket.org/jakebasile/simpleforce/query"
+	"github.com/jakebasile/simpleforce"
+	"github.com/jakebasile/simpleforce/query"
 	"testing"
 )
 
